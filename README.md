@@ -1,7 +1,13 @@
 Jamm
 ====
 
-Java-MMO-Middleware (in very early development now)
+Java-MO-Middleware (in very early development now)
+
+Concept
+====
+
+* tinier than other major mo middlewares
+* easy to use
 
 License information
 ====
