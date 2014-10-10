@@ -1,13 +1,15 @@
 Jamm
 ====
 
-Java-MO-Middleware (in very early development now)
+Java-MO-Middleware (in very early development now)  
+
+developed in Java 8
 
 Concept
 ====
 
 * tinier than other major mo middlewares
-* easy to use
+* easy to use, simple API
 
 License information
 ====
