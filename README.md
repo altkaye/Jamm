@@ -3,11 +3,10 @@ Jamm
 
 Java-MO-Middleware (in very early development now)  
 
-developed in Java 8
-
 Concept
 ====
 
+* developed in Java 8
 * tinier than other major mo middlewares
 * easy to use, simple API
 
