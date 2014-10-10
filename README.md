@@ -6,7 +6,7 @@ Java-MO-Middleware (in very early development now)
 Concept
 ====
 
-* developed on Java 8, based on Netty
+* developed in Java 8, based on Netty
 * tinier than other major mo middlewares
 * easy to use, simple API
 
