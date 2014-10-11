@@ -14,7 +14,7 @@ public class Session {
     
     @Override
     public boolean equals(Object obj) {
-        return this.id == ((Session)obj).id;
+        return this.id.equals(((Session)obj).id);
     }
     
     @Override

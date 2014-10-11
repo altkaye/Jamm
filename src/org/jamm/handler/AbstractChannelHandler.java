@@ -2,6 +2,6 @@ package org.jamm.handler;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-public class AbstractMessageHandler extends ChannelInboundHandlerAdapter {
+public class AbstractChannelHandler extends ChannelInboundHandlerAdapter {
 
 }

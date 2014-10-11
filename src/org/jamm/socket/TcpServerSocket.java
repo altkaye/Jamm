@@ -1,49 +1,76 @@
 package org.jamm.socket;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
-
-import java.security.cert.CertificateException;
+import org.jamm.handler.ChannelHandler;
+import org.jamm.message.MessageListenerInterface;
+import org.jamm.pipeline.JsonMessageDecoder;
+import org.jamm.pipeline.JsonMessageEncoder;
+import org.jamm.session.Session;
 
 import javax.net.ssl.SSLException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
 
-import org.jamm.handler.MessageHandler;
-
-public class TcpServerSocket {
+public class TcpServerSocket<T> implements ServerSocketInterface<T> {
     private final int port;
     private final boolean usesSelfSsl;
     private ChannelFuture channelFuture;
     
-    private MessageHandler handler;
+    private ChannelHandler handler;
 
-    public TcpServerSocket(int socketPort, boolean usesSelfSsl) {
+    private List<MessageListenerInterface<T>> messageReceivedListeners;
+
+   // ExecutorService exec;
+
+    //TODO
+    private TcpServerSocket(int socketPort, int threadPoolSize, boolean usesSelfSsl) {
         this.port = socketPort;
         this.usesSelfSsl = usesSelfSsl;
+       // exec = Executors.newFixedThreadPool(threadPoolSize);
+        messageReceivedListeners = new ArrayList<MessageListenerInterface<T>>();
     }
     
     public TcpServerSocket(int socketPort) {
-        this(socketPort, false);
+        this(socketPort, 3, true);
     }
     
-    public void stop() {
-        //TODO
+    public void close() {
+
     }
 
-    public void start() {
-        handler = new MessageHandler();
+    @Override
+    public void addMessageListener(MessageListenerInterface<T> listenerInterface) {
+        messageReceivedListeners.add(listenerInterface);
+    }
+
+    private void callOnReceive(Session s, Object msg) {
+       // exec.submit(()-> {
+            for (MessageListenerInterface<T> listener : messageReceivedListeners) {
+                listener.onReceive(s, (T)msg);
+            }
+        //});
+    }
+
+    @Override
+    public void send(Session s, T msg) {
+        handler.send(s, msg);
+    }
+
+    public void open() {
+        handler = new ChannelHandler();
+        handler.setReadCallback((s, obj) -> {
+            callOnReceive(s, obj);
+        });
         final SelfSignedCertificate ssc;
         final SslContext sslCtx;
         if (usesSelfSsl) {
@@ -72,8 +99,8 @@ public class TcpServerSocket {
                         pipeline.addLast(sslCtx.newHandler(ch.alloc()));
                     }
                     pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-                    pipeline.addLast(new StringDecoder());
-                    pipeline.addLast(new StringEncoder());
+                    pipeline.addLast(new JsonMessageDecoder());
+                    pipeline.addLast(new JsonMessageEncoder());
                     pipeline.addLast(handler);
                 }
             });
