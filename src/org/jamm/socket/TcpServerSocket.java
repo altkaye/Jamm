@@ -14,6 +14,7 @@ import org.jamm.message.MessageListenerInterface;
 import org.jamm.pipeline.JsonMessageDecoder;
 import org.jamm.pipeline.JsonMessageEncoder;
 import org.jamm.session.Session;
+import org.jamm.util.DebugLog;
 
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
@@ -30,6 +31,8 @@ public class TcpServerSocket<T> implements ServerSocketInterface<T> {
 
     private List<MessageListenerInterface<T>> messageReceivedListeners;
 
+    private Thread serverThread;
+
    // ExecutorService exec;
 
     //TODO
@@ -45,7 +48,7 @@ public class TcpServerSocket<T> implements ServerSocketInterface<T> {
     }
     
     public void close() {
-
+        channelFuture.channel().close();
     }
 
     @Override
@@ -66,7 +69,7 @@ public class TcpServerSocket<T> implements ServerSocketInterface<T> {
         handler.send(s, msg);
     }
 
-    public void open() {
+    private void openSocket() {
         handler = new ChannelHandler();
         handler.setReadCallback((s, obj) -> {
             callOnReceive(s, obj);
@@ -106,14 +109,26 @@ public class TcpServerSocket<T> implements ServerSocketInterface<T> {
             });
             severBootstrap.option(ChannelOption.SO_BACKLOG, 128);
             severBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
-            channelFuture = severBootstrap.bind(port).sync();
+            channelFuture = severBootstrap.bind(port);
+            DebugLog.d("starting server socket");
+            channelFuture.sync();
             channelFuture.channel().closeFuture().sync();
+            DebugLog.d("closing server socket");
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+            DebugLog.d("closed server socket.");
         }
 
+
+    }
+
+    public void open() {
+        serverThread = new Thread(()-> {
+            openSocket();
+        });
+        serverThread.start();
     }
 }

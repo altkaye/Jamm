@@ -14,5 +14,9 @@ public class SimpleJsonServer extends AbstractServer<JsonMessage> {
     @Override
     public void onUpdate(Queue<JsonMessage> jsonMessages) {
         // write logic here
+        while (jsonMessages.size() > 0) {
+            JsonMessage mes = jsonMessages.poll();
+            System.out.print(mes.getBody().toString());
+        }
     }
 }

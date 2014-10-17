@@ -33,6 +33,7 @@ abstract public class AbstractServer<TMessage extends AbstractMessage> implement
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                socketInterface.open();
                 updateCall();
             }
         });
@@ -40,6 +41,7 @@ abstract public class AbstractServer<TMessage extends AbstractMessage> implement
     }
 
     public void close() {
+        socketInterface.close();
         opened = false;
     }
 
