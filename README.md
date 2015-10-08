@@ -1,7 +1,7 @@
 Jamm
 ====
 
-tinu Java-MO-Middleware (in very early development now)  
+tiny Java-MO-Middleware (in very early development now)  
 
 Concept
 ====
